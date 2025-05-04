@@ -8,19 +8,29 @@
 }
 
 html,
-  body {
+body {
   height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
   overflow: hidden;
-  }
+}
 
 body {
   color: rgb(var(--foreground-rgb));
   background: rgb(var(--background-rgb));
+  position: relative;
+}
+
+@supports (padding: max(0px)) {
+  .pb-safe {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
 }
 
 @layer components {
   .chat-container {
-    @apply flex flex-col h-[calc(100vh-4rem)] max-w-4xl mx-auto;
+    @apply flex flex-col h-[calc(100dvh-4rem)] max-w-4xl mx-auto;
   }
   
   .message-bubble {

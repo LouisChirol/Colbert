@@ -1,6 +1,7 @@
 'use client';
 
 import ReactMarkdown from 'react-markdown';
+import Image from 'next/image';
 
 interface Source {
   url: string;
@@ -12,30 +13,38 @@ interface MessageProps {
   role: 'user' | 'assistant';
   content: string;
   sources?: Source[];
+  isError?: boolean;
 }
 
-const Message = ({ role, content, sources = [] }: MessageProps) => {
+const Message = ({ role, content, sources = [], isError = false }: MessageProps) => {
   const isUser = role === 'user';
 
+  const getAvatarSrc = () => {
+    if (isError || content.includes("Désolé, une erreur est survenue. Veuillez réessayer.")) {
+      return '/colbert_sorry.png';
+    }
+    return '/colbert_avatar.png';
+  };
+
   return (
-    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
+    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} gap-3`}>
       {!isUser && (
-        <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z" />
-            <path d="M15 7v2a4 4 0 01-4 4H9.828l-1.766 1.767c.28.149.599.233.938.233h2l3 3v-3h2a2 2 0 002-2V9a2 2 0 00-2-2h-1z" />
-          </svg>
+        <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
+          <Image
+            src={getAvatarSrc()}
+            alt="Colbert Assistant"
+            width={48}
+            height={48}
+            className="w-full h-full object-cover"
+          />
         </div>
       )}
       <div
         className={`max-w-[80%] rounded-lg p-4 ${
           isUser
             ? 'bg-blue-500 text-white'
+            : isError || content.includes("Désolé, une erreur est survenue. Veuillez réessayer.")
+            ? 'bg-red-100 text-red-800'
             : 'bg-gray-100 text-gray-800'
         }`}
       >
@@ -61,11 +70,6 @@ const Message = ({ role, content, sources = [] }: MessageProps) => {
           </div>
         )}
       </div>
-      {isUser && (
-        <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600">
-          U
-        </div>
-      )}
     </div>
   );
 };

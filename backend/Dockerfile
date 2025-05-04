@@ -18,7 +18,7 @@ RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
 # Copy dependency files
 COPY pyproject.toml uv.lock ./
 
-# Create and activate virtual environment
+# Create virtual environment and install dependencies
 RUN . /root/.bashrc && \
     uv venv && \
     . .venv/bin/activate && \
@@ -26,6 +26,9 @@ RUN . /root/.bashrc && \
 
 # Copy the rest of the application
 COPY . .
+
+# Add virtual environment to PATH
+ENV PATH="/app/.venv/bin:$PATH"
 
 # Expose the port the app runs on
 EXPOSE 8000

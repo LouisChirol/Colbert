@@ -33,23 +33,30 @@ const ChatInput = ({ onSendMessage, disabled = false, isLoading = false }: ChatI
   }, [message]);
 
   return (
-    <form onSubmit={handleSubmit} className="chat-input bg-white">
-      <div className="flex-1">
+    <form onSubmit={handleSubmit} className="chat-input bg-white flex items-end gap-2">
+      <div className="flex-1 min-h-[44px]">
         <textarea
           ref={textareaRef}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           placeholder="Posez votre question..."
-          className={`w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none ${
+          className={`w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none min-h-[44px] ${
             disabled || isLoading ? 'bg-gray-100 cursor-not-allowed' : ''
           }`}
           disabled={disabled || isLoading}
           rows={1}
+          onFocus={() => {
+            setTimeout(() => {
+              textareaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            }, 100);
+          }}
         />
       </div>
       <button
         type="submit"
-        className={`send-button ${disabled || isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+        className={`p-2 rounded-full bg-blue-500 text-white hover:bg-blue-600 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center ${
+          disabled || isLoading ? 'opacity-50 cursor-not-allowed' : ''
+        }`}
         disabled={disabled || isLoading}
       >
         <svg

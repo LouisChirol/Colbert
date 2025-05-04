@@ -1,6 +1,7 @@
 'use client';
 
 import Message from '@/components/Message';
+import Image from 'next/image';
 
 interface Message {
     id: string;
@@ -11,6 +12,7 @@ interface Message {
         title: string;
         excerpt: string;
     }>;
+    isError?: boolean;
 }
 
 interface ChatInterfaceProps {
@@ -28,10 +30,20 @@ const ChatInterface = ({ messages, isLoading }: ChatInterfaceProps) => {
                         role={message.isUser ? 'user' : 'assistant'}
                         content={message.content}
                         sources={message.sources}
+                        isError={message.isError}
                     />
                 ))}
                 {isLoading && (
-                    <div className="flex justify-start">
+                    <div className="flex justify-start gap-3">
+                        <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
+                            <Image
+                                src="/colbert_thinking.png"
+                                alt="Colbert Thinking"
+                                width={48}
+                                height={48}
+                                className="w-full h-full object-cover"
+                            />
+                        </div>
                         <div className="max-w-[80%] rounded-lg p-4 bg-gray-100 text-gray-800">
                             <div className="flex space-x-2">
                                 <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>

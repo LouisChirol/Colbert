@@ -13,6 +13,12 @@ rsync -av --exclude 'node_modules' \
           --exclude '.git' \
           frontend/ $TEMP_DIR/frontend/
 
+# Verify public directory was copied
+if [ ! -d "$TEMP_DIR/frontend/public" ]; then
+    echo "Error: public directory not found in frontend!"
+    exit 1
+fi
+
 # Copy backend (excluding __pycache__ and .venv)
 rsync -av --exclude '__pycache__' \
           --exclude '.venv' \
@@ -23,8 +29,11 @@ rsync -av --exclude '__pycache__' \
 cp docker-compose.yml $TEMP_DIR/
 cp setup-server.sh $TEMP_DIR/
 
-# # Copy everything to the server
-# scp  -i ~/.ssh/id_ed25519_colbert -r $TEMP_DIR/* $SERVER:$DEST_DIR/
+# Copy everything to the server
+scp  -i ./id_ed25519_colbert -r $TEMP_DIR/* $SERVER:$DEST_DIR/
+
+# Verify public directory on server
+ssh -i ./id_ed25519_colbert $SERVER "ls -la $DEST_DIR/frontend/public/"
 
 # Clean up
 rm -rf $TEMP_DIR
