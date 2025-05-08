@@ -24,6 +24,10 @@ RUN . /root/.bashrc && \
     . .venv/bin/activate && \
     uv pip install -e .
 
+# Create logs directory and set permissions
+RUN mkdir -p /app/logs && \
+    chmod 777 /app/logs
+
 # Copy the rest of the application
 COPY . .
 

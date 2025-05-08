@@ -10,12 +10,13 @@ from colbert_agent import ColbertAgent
 # Load environment variables
 load_dotenv()
 
-# Delete the old log file if it exists
-if os.path.exists("logs/colbert_backend.log"):
-    os.remove("logs/colbert_backend.log")
+# Ensure logs directory exists
+logs_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs")
+os.makedirs(logs_dir, exist_ok=True)
 
-# Configure logger
-logger.add("logs/colbert_backend.log", rotation="10 MB", retention="7 days", level="INFO")
+# Configure logger with absolute path
+log_file = os.path.join(logs_dir, "colbert_backend.log")
+logger.add(log_file, rotation="10 MB", retention="7 days", level="INFO")
 
 app = FastAPI(
     title="Colbert Backend",
