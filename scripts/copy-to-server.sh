@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Go to the root of the repository
+cd "$(dirname "$0")/.."
+
 # Server details
 SERVER="ubuntu@145.239.71.174"
 DEST_DIR="~/colbert"
@@ -30,10 +33,10 @@ cp docker-compose.yml $TEMP_DIR/
 cp setup-server.sh $TEMP_DIR/
 
 # Copy everything to the server
-scp  -i ./id_ed25519_colbert -r $TEMP_DIR/* $SERVER:$DEST_DIR/
+scp  -i ~/.ssh/id_ed25519_colbert -r $TEMP_DIR/* $SERVER:$DEST_DIR/
 
 # Verify public directory on server
-ssh -i ./id_ed25519_colbert $SERVER "ls -la $DEST_DIR/frontend/public/"
+ssh -i ~/.ssh/id_ed25519_colbert $SERVER "ls -la $DEST_DIR/frontend/public/"
 
 # Clean up
 rm -rf $TEMP_DIR
