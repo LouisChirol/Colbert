@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -8,6 +9,13 @@ from colbert_agent import ColbertAgent
 
 # Load environment variables
 load_dotenv()
+
+# Delete the old log file if it exists
+if os.path.exists("logs/colbert_backend.log"):
+    os.remove("logs/colbert_backend.log")
+
+# Configure logger
+logger.add("logs/colbert_backend.log", rotation="10 MB", retention="7 days", level="INFO")
 
 app = FastAPI(
     title="Colbert Backend",

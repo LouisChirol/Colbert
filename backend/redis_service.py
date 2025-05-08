@@ -5,6 +5,7 @@ import os
 import json
 from dotenv import load_dotenv
 from langchain_core.chat_history import InMemoryChatMessageHistory
+from urllib.parse import urlparse
 
 from loguru import logger
 
@@ -13,12 +14,16 @@ load_dotenv()
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")
 logger.info(f"Connecting to Redis at: {REDIS_URL}")
 
+# Parse Redis URL
+redis_url = urlparse(REDIS_URL)
+redis_host = redis_url.hostname
+redis_port = redis_url.port or 6379
 
 class RedisService:
     def __init__(self):
         self.redis_client = redis.Redis(
-            host=os.getenv("REDIS_HOST", "localhost"),
-            port=int(os.getenv("REDIS_PORT", 6379)),
+            host=redis_host,
+            port=redis_port,
             db=0,
             decode_responses=True,
         )

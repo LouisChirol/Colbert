@@ -4,28 +4,21 @@
 mkdir -p ~/colbert
 cd ~/colbert
 
-# Clone or pull the repository
-if [ -d ".git" ]; then
-    echo "Pulling latest changes..."
-    git pull
-else
-    echo "Cloning repository..."
-    git clone <your-repository-url> .
-fi
+# Copy Nginx configuration
+echo "Updating Nginx configuration..."
+sudo cp nginx/colbertchat.fr.conf /etc/nginx/sites-available/colbertchat.fr
+sudo ln -sf /etc/nginx/sites-available/colbertchat.fr /etc/nginx/sites-enabled/
+sudo nginx -t && sudo systemctl reload nginx
 
-# Set environment variables
-export MISTRAL_API_KEY=your-api-key
+# Copy production environment file
+echo "Setting up environment files..."
+cp frontend/.env.production frontend/.env
 
 # Stop and remove existing containers
 docker-compose down
 
-# Remove old images to force rebuild
-docker-compose rm -f
-docker rmi $(docker images -q 'colbert_*') || true
-
 # Build and start containers
-docker-compose build --no-cache
-docker-compose up -d
+docker-compose up -d --build
 
 # Show container status
 docker-compose ps

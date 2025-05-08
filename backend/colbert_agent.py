@@ -49,7 +49,7 @@ class ColbertAgent:
 
     def get_redis_history(self, session_id: str):
         history = self.redis_service.get_history(session_id)
-        logger.info(f"History: {history}")
+        logger.debug(f"History: {history}")
         return history
 
     def ask_colbert(self, message: str, session_id: str) -> str:
@@ -59,6 +59,7 @@ class ColbertAgent:
                 config={"configurable": {"session_id": session_id}},
             )
             logger.success(f"Response generated for message: {message}")
+            logger.success(f"Response: {response}")
 
             self.redis_service.store_message(
                 session_id, {"role": "user", "content": message}

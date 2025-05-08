@@ -6,14 +6,20 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - NEXT_PUBLIC_API_URL=http://backend:8000
+      - NEXT_PUBLIC_API_URL=https://api.colbertchat.fr
     depends_on:
       - backend
 
   backend:
     build: ./backend
-    ports:
-      - "8000:8000"
+    network_mode: "host"
     environment:
       - MISTRAL_API_KEY=${MISTRAL_API_KEY}
+      - REDIS_URL=redis://localhost:6379
+    restart: unless-stopped
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
     restart: unless-stopped 
