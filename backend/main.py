@@ -1,11 +1,12 @@
 import os
+from typing import List
+
+from colbert_agent import ColbertAgent
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from typing import List
-from dotenv import load_dotenv
 from loguru import logger
-from colbert_agent import ColbertAgent
+from pydantic import BaseModel
 
 # Load environment variables
 load_dotenv()
@@ -75,4 +76,5 @@ async def chat(request: ChatRequest):
 if __name__ == "__main__":
     import uvicorn
 
+    uvicorn.run(app, host="0.0.0.0", port=8000)
     uvicorn.run(app, host="0.0.0.0", port=8000)
