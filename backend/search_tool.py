@@ -1,67 +1,52 @@
-import time
 from typing import List, Optional
 
 from langchain.tools import Tool
-from langchain_community.tools import DuckDuckGoSearchRun
+from langchain.tools.tavily_search import TavilySearchResults
 from loguru import logger
 
 
 class WebsiteSearchTool:
     def __init__(self, preferred_websites: Optional[List[str]] = None):
-        self.search = DuckDuckGoSearchRun()
         self.preferred_websites = preferred_websites or [
             "service-public.fr",
             "legifrance.gouv.fr",
             "ants.gouv.fr",
             "info.gouv.fr",
         ]
-        self.last_search_time = 0
-        self.min_delay = 2  # Minimum delay between searches in seconds
-
-    def _filter_results(self, query: str, results: str) -> str:
-        """Filter search results to only include preferred websites."""
-        if not self.preferred_websites:
-            return results
-
-        filtered_lines = []
-        for line in results.split("\n"):
-            if any(website in line.lower() for website in self.preferred_websites):
-                filtered_lines.append(line)
-
-        return "\n".join(filtered_lines) if filtered_lines else results
+        self.search = TavilySearchResults(
+            max_results=5,
+            include_domains=self.preferred_websites,
+        )
 
     def search_web(self, query: str) -> str:
-        """Search the web and filter results based on preferred websites."""
+        """Search the web and return the most relevant results from preferred websites."""
         try:
-            # Add delay between searches to avoid rate limits
-            current_time = time.time()
-            time_since_last_search = current_time - self.last_search_time
-            if time_since_last_search < self.min_delay:
-                time.sleep(self.min_delay - time_since_last_search)
+            results = self.search.run(query)
 
-            self.last_search_time = time.time()
+            if not results:
+                logger.warning("No results found")
+                return "SEARCH_FAILED"
 
-            try:
-                results = self.search.run(query)
-                filtered_results = self._filter_results(query, results)
-                if filtered_results:
-                    return filtered_results
-            except Exception as e:
-                logger.warning(f"DuckDuckGo search failed: {str(e)}")
+            # Extract URLs from results
+            urls = [result.get("url", "") for result in results if result.get("url")]
 
-            return (
-                "Désolé, je n'ai pas pu trouver d'informations pertinentes. "
-                "Veuillez consulter directement le site service-public.fr pour des informations à jour."
-            )
+            if urls:
+                logger.info(f"Found {len(urls)} URLs: {urls}")
+                return "\n".join(urls)
+
+            return "SEARCH_FAILED"
 
         except Exception as e:
             logger.error(f"Error during web search: {str(e)}")
-            return "Désolé, une erreur est survenue lors de la recherche web."
+            return "SEARCH_FAILED"
 
     def get_tool(self) -> Tool:
         """Return the search tool for use in the agent."""
         return Tool(
             name="web_search",
-            description="Search the web for information, focusing on French government websites.",
+            description="""Search the web for information, focusing on French government websites.
+            If the search fails (returns 'SEARCH_FAILED'), you should provide an answer based on your knowledge,
+            but include a disclaimer that the information should be verified as it comes from your training data
+            and not from current official sources. DO NOT include any source URLs when the search fails.""",
             func=self.search_web,
         )

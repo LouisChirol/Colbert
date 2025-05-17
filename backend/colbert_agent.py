@@ -65,9 +65,7 @@ class ColbertAgent:
 
         # Create the agent with tools
         self.agent = create_openai_tools_agent(
-            llm=self.llm,
-            tools=self.tools,
-            prompt=self.prompt
+            llm=self.llm, tools=self.tools, prompt=self.prompt
         )
 
         # Create the agent executor with proper configuration
@@ -96,12 +94,12 @@ class ColbertAgent:
         """Format the response with sources using markdown."""
         # Format the answer with proper spacing and line breaks
         formatted_answer = response.answer.strip()
-        
+
         # Format sources as markdown links with prefix
         sources_text = "\n\nSources:\n"
         for source in response.sources:
             sources_text += f"- [{source}]({source})\n"
-            
+
         return formatted_answer + sources_text
 
     def ask_colbert(self, message: str, session_id: str) -> str:
@@ -109,7 +107,7 @@ class ColbertAgent:
             try:
                 logger.info(f"Attempting to use model: {model}")
                 self._initialize_llm(model)
-                
+
                 response = self.chain_with_history.invoke(
                     {"input": message, "session_id": session_id},
                     config={"configurable": {"session_id": session_id}},
@@ -118,7 +116,9 @@ class ColbertAgent:
                 # Extract and parse the output
                 if isinstance(response, dict) and "output" in response:
                     try:
-                        structured_output = ColbertResponse.model_validate_json(response["output"])
+                        structured_output = ColbertResponse.model_validate_json(
+                            response["output"]
+                        )
                         output = self._format_response(structured_output)
                     except Exception as e:
                         logger.warning(f"Failed to parse structured output: {str(e)}")
