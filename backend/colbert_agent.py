@@ -1,4 +1,5 @@
 import os
+import time
 from typing import List
 
 from colbert_prompt import COLBERT_PROMPT, OUTPUT_PROMPT, TOOLS_PROMPT
@@ -96,10 +97,10 @@ class ColbertAgent:
         # Format the answer with proper spacing and line breaks
         formatted_answer = response.answer.strip()
         
-        # Format sources as markdown links with @ prefix
+        # Format sources as markdown links with prefix
         sources_text = "\n\nSources:\n"
         for source in response.sources:
-            sources_text += f"- [@{source}](@{source})\n"
+            sources_text += f"- [{source}]({source})\n"
             
         return formatted_answer + sources_text
 
@@ -117,7 +118,8 @@ class ColbertAgent:
                 # Extract and parse the output
                 if isinstance(response, dict) and "output" in response:
                     try:
-                        output = self._format_response(response["output"])
+                        structured_output = ColbertResponse.model_validate_json(response["output"])
+                        output = self._format_response(structured_output)
                     except Exception as e:
                         logger.warning(f"Failed to parse structured output: {str(e)}")
                         output = str(response["output"])
@@ -136,7 +138,8 @@ class ColbertAgent:
                 return output
 
             except Exception as e:
-                logger.warning(f"Error with model {model}: {str(e)}")
+                logger.warning(f"Error with model {model}: {str(e)}; waiting 3s")
+                time.sleep(3)
                 if model == MISTRAL_MODELS[-1]:  # If this was the last model
                     logger.error(f"All models failed. Last error: {str(e)}")
                     return "Désolé, une erreur est survenue. Veuillez réessayer."

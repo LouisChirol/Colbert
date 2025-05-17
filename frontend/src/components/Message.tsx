@@ -1,7 +1,8 @@
 'use client';
 
-import ReactMarkdown from 'react-markdown';
 import Image from 'next/image';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface Source {
   url: string;
@@ -48,10 +49,60 @@ const Message = ({ role, content, sources = [], isError = false }: MessageProps)
             : 'bg-gray-100 text-gray-800'
         }`}
       >
-        <ReactMarkdown>{content}</ReactMarkdown>
+        <div className={`prose prose-sm max-w-none ${isUser ? 'prose-invert' : 'prose-gray'}`}>
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            components={{
+              // Style links
+              a: ({ node, ...props }) => (
+                <a
+                  {...props}
+                  className={`${
+                    isUser
+                      ? 'text-blue-200 hover:text-white'
+                      : 'text-blue-600 hover:text-blue-800'
+                  } underline transition-colors`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                />
+              ),
+              // Style lists
+              ul: ({ node, ...props }) => (
+                <ul {...props} className={`list-disc pl-4 space-y-1 ${isUser ? 'text-white' : 'text-gray-800'}`} />
+              ),
+              ol: ({ node, ...props }) => (
+                <ol {...props} className={`list-decimal pl-4 space-y-1 ${isUser ? 'text-white' : 'text-gray-800'}`} />
+              ),
+              // Style paragraphs
+              p: ({ node, ...props }) => (
+                <p {...props} className={`mb-2 ${isUser ? 'text-white' : 'text-gray-800'}`} />
+              ),
+              // Style headings
+              h1: ({ node, ...props }) => (
+                <h1 {...props} className={`text-xl font-bold mb-2 ${isUser ? 'text-white' : 'text-gray-900'}`} />
+              ),
+              h2: ({ node, ...props }) => (
+                <h2 {...props} className={`text-lg font-bold mb-2 ${isUser ? 'text-white' : 'text-gray-900'}`} />
+              ),
+              h3: ({ node, ...props }) => (
+                <h3 {...props} className={`text-base font-bold mb-2 ${isUser ? 'text-white' : 'text-gray-900'}`} />
+              ),
+              // Style code blocks
+              code: ({ node, inline, ...props }) => (
+                inline ? (
+                  <code {...props} className={`${isUser ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'} rounded px-1 py-0.5`} />
+                ) : (
+                  <code {...props} className={`block ${isUser ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'} rounded p-2 my-2`} />
+                )
+              ),
+            }}
+          >
+            {content}
+          </ReactMarkdown>
+        </div>
         {sources.length > 0 && (
           <div className="mt-4 pt-4 border-t border-gray-200">
-            <h4 className="text-sm font-semibold mb-2">Sources :</h4>
+            <h4 className="text-sm font-semibold mb-2 text-gray-900">Sources :</h4>
             <ul className="space-y-2">
               {sources.map((source, index) => (
                 <li key={index} className="text-sm">

@@ -24,10 +24,12 @@ Exemple: web_search("prix carte identité")
 """
 
 OUTPUT_PROMPT = """
-You must format your response as a JSON object with the following structure:
+Tu dois formater ta réponse comme un objet JSON avec la structure suivante :
 {{
-  "answer": "Your detailed answer here",
+  "answer": "Ta réponse détaillée ici",
   "sources": ["url1", "url2", ...]
 }}
-Always include at least one source URL in your response.
+
+La réponse doit être en français et aussi détaillée que possible.
+Inclure toujours au moins une URL source dans ta réponse.
 """

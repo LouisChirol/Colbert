@@ -1,8 +1,6 @@
 import time
 from typing import List, Optional
 
-import requests
-from bs4 import BeautifulSoup
 from langchain.tools import Tool
 from langchain_community.tools import DuckDuckGoSearchRun
 from loguru import logger
@@ -15,7 +13,7 @@ class WebsiteSearchTool:
             "service-public.fr",
             "legifrance.gouv.fr",
             "ants.gouv.fr",
-            "gouvernement.fr",
+            "info.gouv.fr",
         ]
         self.last_search_time = 0
         self.min_delay = 2  # Minimum delay between searches in seconds
@@ -31,33 +29,6 @@ class WebsiteSearchTool:
                 filtered_lines.append(line)
 
         return "\n".join(filtered_lines) if filtered_lines else results
-
-    def _fallback_search(self, query: str) -> str:
-        """Fallback search using direct requests to service-public.fr."""
-        try:
-            # Add French government websites to the search
-            search_url = "https://www.service-public.fr/particuliers/vosdroits/N358"
-            response = requests.get(search_url, timeout=10)
-            response.raise_for_status()
-
-            soup = BeautifulSoup(response.text, "html.parser")
-            content = soup.get_text()
-
-            # Extract relevant information
-            relevant_info = []
-            for website in self.preferred_websites:
-                if website in content.lower():
-                    relevant_info.append(f"Information trouvée sur {website}")
-
-            return (
-                "\n".join(relevant_info)
-                if relevant_info
-                else "Aucune information trouvée sur les sites préférés."
-            )
-
-        except Exception as e:
-            logger.error(f"Error during fallback search: {str(e)}")
-            return ""
 
     def search_web(self, query: str) -> str:
         """Search the web and filter results based on preferred websites."""
@@ -77,11 +48,6 @@ class WebsiteSearchTool:
                     return filtered_results
             except Exception as e:
                 logger.warning(f"DuckDuckGo search failed: {str(e)}")
-
-            # If DuckDuckGo fails or returns no results, try fallback
-            fallback_results = self._fallback_search(query)
-            if fallback_results:
-                return fallback_results
 
             return (
                 "Désolé, je n'ai pas pu trouver d'informations pertinentes. "
