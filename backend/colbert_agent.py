@@ -1,13 +1,13 @@
 import os
-import time
 from typing import List
 
 from colbert_prompt import COLBERT_PROMPT, OUTPUT_PROMPT, TOOLS_PROMPT
 from dotenv import load_dotenv
 from langchain.agents import AgentExecutor, create_openai_tools_agent
+from langchain_community.vectorstores import Chroma
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables.history import RunnableWithMessageHistory
-from langchain_mistralai import ChatMistralAI
+from langchain_mistralai import ChatMistralAI, MistralAIEmbeddings
 from loguru import logger
 from pydantic import BaseModel, Field
 from redis_service import RedisService
@@ -38,6 +38,17 @@ class ColbertAgent:
         # Initialize search tool
         self.search_tool = WebsiteSearchTool()
         self.tools = [self.search_tool.get_tool()]
+
+        # Initialize vector store
+        self.embeddings = MistralAIEmbeddings(
+            model="mistral-embed",
+            api_key=MISTRAL_API_KEY
+        )
+        self.vector_store = Chroma(
+            collection_name="service_public",
+            embedding_function=self.embeddings,
+            persist_directory="chroma_db"
+        )
 
         # Create the prompt template
         self.prompt = ChatPromptTemplate.from_messages(
@@ -102,14 +113,26 @@ class ColbertAgent:
 
         return formatted_answer + sources_text
 
+    def _get_relevant_documents(self, query: str, k: int = 3):
+        """Retrieve relevant documents from the vector store."""
+        docs = self.vector_store.similarity_search(query, k=k)
+        return docs
+
     def ask_colbert(self, message: str, session_id: str) -> str:
+        # First, get relevant documents from the vector store
+        relevant_docs = self._get_relevant_documents(message)
+        
+        # Add the relevant context to the message
+        context = "\n\n".join([doc.page_content for doc in relevant_docs])
+        enhanced_message = f"{message}\n\nRelevant context:\n{context}"
+
         for model in MISTRAL_MODELS:
             try:
                 logger.info(f"Attempting to use model: {model}")
                 self._initialize_llm(model)
 
                 response = self.chain_with_history.invoke(
-                    {"input": message, "session_id": session_id},
+                    {"input": enhanced_message, "session_id": session_id},
                     config={"configurable": {"session_id": session_id}},
                 )
 
@@ -138,9 +161,7 @@ class ColbertAgent:
                 return output
 
             except Exception as e:
-                logger.warning(f"Error with model {model}: {str(e)}; waiting 3s")
-                time.sleep(3)
-                if model == MISTRAL_MODELS[-1]:  # If this was the last model
-                    logger.error(f"All models failed. Last error: {str(e)}")
-                    return "Désolé, une erreur est survenue. Veuillez réessayer."
-                continue  # Try the next model
+                logger.error(f"Error with model {model}: {str(e)}")
+                continue
+
+        raise Exception("All models failed to generate a response")
