@@ -57,6 +57,7 @@ sudo certbot --nginx -d colbertchat.fr -d www.colbertchat.fr -d api.colbertchat.
 
 # Set environment variables
 export MISTRAL_API_KEY=your-api-key
+export TAVILY_API_KEY=your-api-key
 
 # Build and start containers
 docker-compose down

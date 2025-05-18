@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface ChatInputProps {
   onSendMessage: (content: string) => void;
@@ -17,13 +17,24 @@ const ChatInput = ({ onSendMessage, disabled = false, isLoading = false }: ChatI
     if (message.trim() && !disabled && !isLoading) {
       onSendMessage(message);
       setMessage('');
+      // Reset textarea height
+      if (textareaRef.current) {
+        textareaRef.current.style.height = '44px';
+      }
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit(e);
     }
   };
 
   const adjustTextareaHeight = () => {
     const textarea = textareaRef.current;
     if (textarea) {
-      textarea.style.height = 'auto';
+      textarea.style.height = '44px'; // Reset to min height
       textarea.style.height = `${Math.min(textarea.scrollHeight, 150)}px`;
     }
   };
@@ -33,14 +44,15 @@ const ChatInput = ({ onSendMessage, disabled = false, isLoading = false }: ChatI
   }, [message]);
 
   return (
-    <form onSubmit={handleSubmit} className="chat-input bg-white flex items-end gap-2">
-      <div className="flex-1 min-h-[44px]">
+    <form onSubmit={handleSubmit} className="chat-input bg-white flex items-end gap-2 p-4 border-t">
+      <div className="flex-1">
         <textarea
           ref={textareaRef}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
+          onKeyDown={handleKeyDown}
           placeholder="Posez votre question..."
-          className={`w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none min-h-[44px] ${
+          className={`w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none min-h-[44px] ${
             disabled || isLoading ? 'bg-gray-100 cursor-not-allowed' : ''
           }`}
           disabled={disabled || isLoading}
@@ -54,7 +66,7 @@ const ChatInput = ({ onSendMessage, disabled = false, isLoading = false }: ChatI
       </div>
       <button
         type="submit"
-        className={`p-2 rounded-full bg-blue-500 text-white hover:bg-blue-600 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center ${
+        className={`p-3 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center ${
           disabled || isLoading ? 'opacity-50 cursor-not-allowed' : ''
         }`}
         disabled={disabled || isLoading}

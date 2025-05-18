@@ -2,6 +2,7 @@
 
 import Message from '@/components/Message';
 import Image from 'next/image';
+import { useEffect, useRef } from 'react';
 
 interface Message {
     id: string;
@@ -21,6 +22,16 @@ interface ChatInterfaceProps {
 }
 
 const ChatInterface = ({ messages, isLoading }: ChatInterfaceProps) => {
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages, isLoading]);
+
     return (
         <div className="flex flex-col h-full">
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -53,6 +64,7 @@ const ChatInterface = ({ messages, isLoading }: ChatInterfaceProps) => {
                         </div>
                     </div>
                 )}
+                <div ref={messagesEndRef} />
             </div>
         </div>
     );

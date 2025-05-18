@@ -88,7 +88,7 @@ const Message = ({ role, content, sources = [], isError = false }: MessageProps)
                 <h3 {...props} className={`text-base font-bold mb-2 ${isUser ? 'text-white' : 'text-gray-900'}`} />
               ),
               // Style code blocks
-              code: ({ node, inline, ...props }) => (
+              code: ({ node, inline, ...props }: { node?: any; inline?: boolean } & React.HTMLAttributes<HTMLElement>) => (
                 inline ? (
                   <code {...props} className={`${isUser ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'} rounded px-1 py-0.5`} />
                 ) : (
@@ -103,18 +103,19 @@ const Message = ({ role, content, sources = [], isError = false }: MessageProps)
         {sources.length > 0 && (
           <div className="mt-4 pt-4 border-t border-gray-200">
             <h4 className="text-sm font-semibold mb-2 text-gray-900">Sources :</h4>
-            <ul className="space-y-2">
+            <ul className="space-y-2 overflow-hidden">
               {sources.map((source, index) => (
-                <li key={index} className="text-sm">
+                <li key={index} className="text-sm break-words">
                   <a
                     href={source.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-500 hover:underline"
+                    className="text-blue-500 hover:underline truncate block max-w-full"
+                    title={source.url}
                   >
-                    {source.title}
+                    {source.url.length > 60 ? `${source.url.substring(0, 60)}...` : source.url}
                   </a>
-                  <p className="text-gray-600 mt-1">{source.excerpt}</p>
+                  <p className="text-gray-600 mt-1 break-words">{source.excerpt}</p>
                 </li>
               ))}
             </ul>
