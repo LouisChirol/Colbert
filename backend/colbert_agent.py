@@ -121,7 +121,7 @@ class ColbertAgent:
     def ask_colbert(self, message: str, session_id: str) -> str:
         # First, get relevant documents from the vector store
         relevant_docs = self._get_relevant_documents(message)
-        
+
         # Add the relevant context to the message
         context = "\n\n".join([doc.page_content for doc in relevant_docs])
         enhanced_message = f"{message}\n\nRelevant context:\n{context}"

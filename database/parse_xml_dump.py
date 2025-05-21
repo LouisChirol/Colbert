@@ -49,11 +49,15 @@ class XMLParser:
             model="mistral-embed", api_key=os.getenv("MISTRAL_API_KEY")
         )
 
+        # Create chroma_db directory if it doesn't exist
+        persist_dir = Path("chroma_db")
+        persist_dir.mkdir(exist_ok=True)
+
         # Initialize vector store
         self.vector_store = Chroma(
             collection_name="service_public",
             embedding_function=self.embeddings,
-            persist_directory="chroma_db",
+            persist_directory=str(persist_dir),
         )
 
     def extract_text_content(self, element: ET.Element) -> str:
@@ -145,6 +149,7 @@ class XMLParser:
 
         try:
             self.vector_store.add_texts(texts=texts, metadatas=metadatas)
+            logger.debug(f"Added batch of {len(texts)} documents to vector store")
         except Exception as e:
             logger.error(f"Error adding batch to vector store: {str(e)}")
 
@@ -181,15 +186,16 @@ class XMLParser:
         ):
             batch = all_documents[i: i + BATCH_SIZE]
             self.process_batch(batch)
+            logger.info(f"Processed batch {i//BATCH_SIZE + 1}/{(len(all_documents)-1)//BATCH_SIZE + 1}")
 
-        # Persist the database
-        self.vector_store.persist()
-        logger.info("Vector database persisted successfully")
+        # Verify the documents were added
+        count = self.vector_store._collection.count()
+        logger.info(f"Total documents in vector store: {count}")
 
 
 def main():
     # Use the correct path to the XML files
-    parser = XMLParser("data/service-public/vosdroits-latest")
+    parser = XMLParser("data/service-public")
     parser.process_directory()
 
 

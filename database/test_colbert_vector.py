@@ -41,7 +41,8 @@ def test_colbert_vector():
     prompt = ChatPromptTemplate.from_template(template)
 
     # Test query
-    test_query = "Comment obtenir un permis de construire ?"
+    # test_query = "Comment obtenir un permis de construire ?"
+    test_query = "Comment utiliser ses chèques vacances ?"
     print(f"\nQuestion: {test_query}")
 
     # Get relevant documents
