@@ -140,3 +140,6 @@ desktop.ini
 
 database/data
 database/chroma_db
+backend/chroma_db
+*.ipynb
+*.txt
