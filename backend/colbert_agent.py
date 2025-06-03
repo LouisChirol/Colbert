@@ -2,7 +2,6 @@ import os
 import re
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, List
 
 from colbert_prompt import COLBERT_PROMPT, OUTPUT_PROMPT
 from dotenv import load_dotenv
@@ -34,8 +33,11 @@ CHROMA_DB_PATH = WORKSPACE_ROOT / "database" / "chroma_db"
 
 class ColbertResponse(BaseModel):
     answer: str = Field(description="The answer to the user's question")
-    sources: List[str] = Field(
+    sources: list[str] = Field(
         description="The sources used to answer the user's question, should be a list of urls"
+    )
+    secondary_sources: list[str] = Field(
+        description="The secondary sources used to answer the user's question, should be a list of urls"
     )
 
 
@@ -143,7 +145,7 @@ class ColbertAgent:
 
         return formatted_answer
 
-    def _get_relevant_documents(self, query: str) -> Dict[str, List[Dict]]:
+    def _get_relevant_documents(self, query: str) -> dict[str, list[dict]]:
         """Retrieve relevant documents, deduplicated by source, with their metadata.
         
         Returns a dictionary mapping source URLs to lists of document chunks with their metadata.
@@ -155,7 +157,7 @@ class ColbertAgent:
         logger.info(f"Found {len(docs)} documents in similarity search")
         
         # Group documents by source URL
-        source_docs: Dict[str, List[Dict]] = defaultdict(list)
+        source_docs: dict[str, list[dict]] = defaultdict(list)
         for i, doc in enumerate(docs, 1):
             # Get the source URL from metadata, with fallback to service-public.fr
             source_url = doc.metadata.get('spUrl')
@@ -201,7 +203,7 @@ class ColbertAgent:
         
         return dict(source_docs)
 
-    def _format_context(self, source_docs: Dict[str, List[Dict]]) -> str:
+    def _format_context(self, source_docs: dict[str, list[dict]]) -> str:
         """Format the context from deduplicated documents for the LLM."""
         context_parts = []
         
@@ -212,31 +214,33 @@ class ColbertAgent:
          
         return "\n---\n".join(context_parts)
 
-    def _get_source_urls(self, source_docs: Dict[str, List[Dict]]) -> List[str]:
+    def _get_source_urls(self, source_docs: dict[str, list[dict]]) -> tuple[list[str], list[str]]:
         """Extract unique source URLs from the documents, including both primary and secondary sources."""
         sources = set()
+        secondary_sources = set()
         for docs in source_docs.values():
             for doc in docs:
                 # Add primary source
                 if doc['metadata'].get('primary_source'):
                     sources.add(doc['metadata']['primary_source'])
                 # Add secondary source if it exists and is different
-                # if doc['metadata'].get('secondary_source'):
-                #     sources.add(doc['metadata']['secondary_source'])
-        
+                if doc['metadata'].get('secondary_source'):
+                    secondary_sources.add(doc['metadata']['secondary_source'])
         # Convert to list and ensure service-public.fr is last if present
         source_list = list(sources)
+        secondary_source_list = list(secondary_sources)
         
         logger.info(f"Extracted {len(source_list)} unique sources including secondary sources")
-        return source_list
+        return source_list, secondary_source_list
 
     def ask_colbert(self, message: str, session_id: str) -> str:
 
         # Get relevant documents
         source_docs = self._get_relevant_documents(message)
-        source_urls = self._get_source_urls(source_docs) if source_docs else []
+        source_urls, secondary_source_urls = self._get_source_urls(source_docs) if source_docs else ([], [])
         logger.info(f"Found {len(source_urls)} unique source URLs: {source_urls}")
-        
+        logger.info(f"Found {len(secondary_source_urls)} unique secondary source URLs: {secondary_source_urls}")
+
         # Prepare message with context if documents found
         if source_docs:
             context = self._format_context(source_docs)
@@ -256,34 +260,27 @@ class ColbertAgent:
             )
             
             # response is a ColbertResponse instance
-            logger.debug(f"Got response: {response}")
-            
-            answer = response.answer
-            sources = response.sources if hasattr(response, 'sources') and response.sources else []
+            logger.debug(f"Got answer: {response.answer}")
+            logger.debug(f"Sources: {response.sources}")
+            logger.debug(f"Secondary sources: {response.secondary_sources}")
+
             
             # Add disclaimer if no documents found
             if not source_docs:
                 logger.info("No documents found, using general knowledge with disclaimer")
-                answer = (
+                response.answer = (
                     "Note: Je n'ai pas trouvé d'informations spécifiques dans ma base de données "
                     "pour répondre à votre question. Je vais donc répondre en me basant sur mes "
                     "connaissances générales. Veuillez noter que cette réponse n'est pas "
                     "nécessairement spécifique au contexte français ou aux services publics français.\n\n"
-                ) + answer
-                sources = ["https://www.service-public.fr"]
-            else:
-                logger.info("Using document sources")
-                sources = source_urls
-            
-            # Create final structured output
-            structured_output = ColbertResponse(
-                answer=answer,
-                sources=sources
-            )
+                ) + response.answer
+                response.sources = ["https://www.service-public.fr"]
+                response.secondary_sources = []
             
             # Format the response
-            output = self._format_response(structured_output)
-            logger.info(f"Final response has {len(sources)} sources")
+            output = self._format_response(response)
+            logger.info(f"Final response has {len(response.sources)} sources")
+            logger.info(f"Final response has {len(response.secondary_sources)} secondary sources")
             logger.success(f"Response generated for message: {message}")
             logger.debug(f"Response preview: {output[:200]}...")
             

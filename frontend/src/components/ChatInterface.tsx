@@ -13,6 +13,11 @@ interface Message {
         title: string;
         excerpt: string;
     }>;
+    secondarySources?: Array<{
+        url: string;
+        title: string;
+        excerpt: string;
+    }>;
     isError?: boolean;
 }
 
@@ -41,6 +46,7 @@ const ChatInterface = ({ messages, isLoading }: ChatInterfaceProps) => {
                         role={message.isUser ? 'user' : 'assistant'}
                         content={message.content}
                         sources={message.sources}
+                        secondarySources={message.secondarySources}
                         isError={message.isError}
                     />
                 ))}

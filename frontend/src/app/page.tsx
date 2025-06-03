@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
-import ChatInterface from '@/components/ChatInterface';
 import ChatInput from '@/components/ChatInput';
+import ChatInterface from '@/components/ChatInterface';
 import { sendMessage } from '@/services/api';
 import Image from 'next/image';
+import { useState } from 'react';
 
 export default function Home() {
   const [messages, setMessages] = useState([
@@ -33,8 +33,8 @@ export default function Home() {
       const aiMessage = {
         id: (Date.now() + 1).toString(),
         content: response.answer,
-        isUser: false,
         sources: response.sources,
+        secondarySources: response.secondary_sources,
       };
       setMessages((prev) => [...prev, aiMessage]);
     } catch (error) {
