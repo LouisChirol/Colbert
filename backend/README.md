@@ -36,25 +36,6 @@ backend/
 └── Dockerfile          # Container configuration
 ```
 
-## Setup
-
-1. Create and activate a virtual environment:
-```bash
-python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-```
-
-2. Install dependencies:
-```bash
-pip install -e .
-```
-
-3. Set up environment variables:
-```bash
-cp .env.example .env
-# Edit .env with your configuration
-```
-
 Required environment variables:
 - `MISTRAL_API_KEY`: Your Mistral AI API key
 - `REDIS_URL`: Redis connection URL
@@ -67,36 +48,10 @@ Required environment variables:
 uvicorn main:app --reload --port 8000
 ```
 
-2. Access the API documentation:
-- Swagger UI: http://localhost:8000/docs
-- ReDoc: http://localhost:8000/redoc
-
 ## API Endpoints
 
 ### POST /chat
 Main endpoint for chat interactions.
-
-Request body:
-```json
-{
-    "message": "string",
-    "session_id": "string"
-}
-```
-
-Response:
-```json
-{
-    "answer": "string",
-    "sources": [
-        {
-            "url": "string",
-            "title": "string",
-            "excerpt": "string"
-        }
-    ]
-}
-```
 
 ## Docker
 
@@ -105,13 +60,6 @@ Build and run the container:
 docker build -t colbert-backend .
 docker run -p 8000:8000 colbert-backend
 ```
-
-## Logging
-
-Logs are stored in the `logs/` directory with:
-- Rotation: 10 MB per file
-- Retention: 7 days
-- Level: INFO
 
 ## License
 

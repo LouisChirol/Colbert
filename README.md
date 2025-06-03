@@ -45,26 +45,6 @@ colbert/
   - Docker & Docker Compose
   - Nginx
 
-## Getting Started
-
-1. Clone the repository
-2. Set up environment variables:
-   ```bash
-   cp .env.example .env
-   # Edit .env with your configuration
-   ```
-3. Start the services:
-   ```bash
-   docker-compose up
-   ```
-
-## Development
-
-Each component has its own setup instructions in their respective directories:
-- [Backend Setup](backend/README.md)
-- [Frontend Setup](frontend/README.md)
-- [Database Setup](database/README.md)
-
 ## License
 
 This project is licensed under the Creative Commons Attribution-NonCommercial 4.0 (CC BY-NC 4.0) license.
