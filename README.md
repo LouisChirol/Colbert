@@ -48,3 +48,6 @@ colbert/
 ## License
 
 This project is licensed under the Creative Commons Attribution-NonCommercial 4.0 (CC BY-NC 4.0) license.
+
+## Update
+See PR agent_refactor for the work in progress about the RAG feature from the data.gouv dump of the service-public website.
