@@ -139,3 +139,6 @@ desktop.ini
 
 database/data
 database/chroma_db
+
+*.txt
+*.sqlite3
