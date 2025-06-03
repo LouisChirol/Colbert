@@ -20,7 +20,7 @@ load_dotenv()
 # Constants
 EMBEDDING_BATCH_SIZE = 20  # Increased batch size for higher rate limits
 MAX_THREADS = 8  # Increased threads for parallel processing
-MAX_DOCUMENTS = 500  # Keep the same control parameter
+MAX_DOCUMENTS = -1  # Keep the same control parameter, -1 for all
 CHUNK_SIZE = 2000  # Keep the same chunk size
 CHUNK_OVERLAP = 100  # Keep the same overlap
 BATCH_DELAY = 0.5  # Reduced delay between batches due to higher rate limits

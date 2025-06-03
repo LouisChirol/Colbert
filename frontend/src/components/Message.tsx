@@ -14,10 +14,11 @@ interface MessageProps {
   role: 'user' | 'assistant';
   content: string;
   sources?: Source[];
+  secondarySources?: Source[];
   isError?: boolean;
 }
 
-const Message = ({ role, content, sources = [], isError = false }: MessageProps) => {
+const Message = ({ role, content, sources = [], secondarySources = [], isError = false }: MessageProps) => {
   const isUser = role === 'user';
 
   const getAvatarSrc = () => {
@@ -102,23 +103,71 @@ const Message = ({ role, content, sources = [], isError = false }: MessageProps)
         </div>
         {sources.length > 0 && (
           <div className="mt-4 pt-4 border-t border-gray-200">
-            <h4 className="text-sm font-semibold mb-2 text-gray-900">Sources :</h4>
-            <ul className="space-y-2 overflow-hidden">
-              {sources.map((source, index) => (
-                <li key={index} className="text-sm break-words">
-                  <a
-                    href={source.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-500 hover:underline truncate block max-w-full"
-                    title={source.url}
+            <details className="group">
+              <summary className="flex items-center gap-2 cursor-pointer text-sm font-semibold text-gray-900 hover:text-blue-600 transition-colors">
+                <svg
+                  className="w-4 h-4 transform group-open:rotate-90 transition-transform"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+                Sources principales ({sources.length})
+              </summary>
+              <ul className="mt-2 space-y-3 pl-6">
+                {sources.map((source, index) => (
+                  <li key={index} className="text-sm break-words">
+                    <a
+                      href={source.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-800 hover:underline truncate block max-w-full"
+                      title={source.url}
+                    >
+                      {source.url.length > 60 ? `${source.url.substring(0, 60)}...` : source.url}
+                    </a>
+                    {source.excerpt && (
+                      <p className="text-gray-600 mt-1 break-words text-sm">{source.excerpt}</p>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </details>
+
+            {secondarySources.length > 0 && (
+              <details className="group mt-3">
+                <summary className="flex items-center gap-2 cursor-pointer text-sm font-semibold text-gray-700 hover:text-blue-600 transition-colors">
+                  <svg
+                    className="w-4 h-4 transform group-open:rotate-90 transition-transform"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
                   >
-                    {source.url.length > 60 ? `${source.url.substring(0, 60)}...` : source.url}
-                  </a>
-                  <p className="text-gray-600 mt-1 break-words">{source.excerpt}</p>
-                </li>
-              ))}
-            </ul>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                  Sources complémentaires ({secondarySources.length})
+                </summary>
+                <ul className="mt-2 space-y-3 pl-6">
+                  {secondarySources.map((source, index) => (
+                    <li key={index} className="text-sm break-words">
+                      <a
+                        href={source.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-500 hover:text-blue-700 hover:underline truncate block max-w-full"
+                        title={source.url}
+                      >
+                        {source.url.length > 60 ? `${source.url.substring(0, 60)}...` : source.url}
+                      </a>
+                      {source.excerpt && (
+                        <p className="text-gray-500 mt-1 break-words text-sm">{source.excerpt}</p>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            )}
           </div>
         )}
       </div>
