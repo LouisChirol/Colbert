@@ -20,17 +20,20 @@ Colbert provides a simple web/mobile interface to access information from Servic
 ```
 colbert/
 ├── backend/         # FastAPI service and RAG pipeline
+├── database/        # Database migrations and schemas
 ├── frontend/        # Next.js web application
-├── infra/          # Terraform configurations
-└── scraper/        # Content ingestion scripts
+├── nginx/          # Nginx configuration for production
+├── scripts/        # Utility scripts and tools
+└── docker-compose.yml  # Docker compose configuration
 ```
 
 ## Technical Stack
 
 - **Backend**: FastAPI, LangGraph/LangChain, Mistral AI
-- **Frontend**: Next.js, TypeScript
+- **Frontend**: Next.js, TypeScript, Tailwind CSS
+- **Database**: PostgreSQL
 - **Vector Store**: Chroma/Qdrant
-- **Infrastructure**: Docker, Terraform, OVH KS-B
+- **Infrastructure**: Docker, Docker Compose, Nginx
 - **Data Processing**: Python, HTTPX, BeautifulSoup
 
 ## License
@@ -43,8 +46,12 @@ Detailed setup instructions for each component can be found in their respective 
 
 - [Backend Setup](backend/README.md)
 - [Frontend Setup](frontend/README.md)
-- [Infrastructure Setup](infra/README.md)
-- [Scraper Setup](scraper/README.md)
+- [Database Setup](database/README.md)
+
+For local development, you can use Docker Compose to start all services:
+```bash
+docker-compose up
+```
 
 ## Contributing
 

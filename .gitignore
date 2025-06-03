@@ -123,7 +123,6 @@ qdrant/
 data/
 scraped/
 *.json
-*.md
 !package.json
 !package-lock.json
 
